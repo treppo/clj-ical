@@ -2,3 +2,5 @@ lib/
 pom.xml
 *.jar
 /docs/
+target/
+.lein-failures
