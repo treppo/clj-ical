@@ -16,11 +16,10 @@
 
 (ns clj-ical.test-format
   (:use clojure.test)
-  (:import
-   [org.joda.time LocalDate])
   (:require clj-ical.format
             clj-time.format
-            [clj-time.core :as time]))
+            [clj-time.core :as time])
+  (:import (java.time ZoneId ZoneOffset ZonedDateTime LocalDateTime LocalDate OffsetDateTime)))
 
 (deftest test-ical
   (letfn
@@ -77,8 +76,16 @@
 
     (testing "Dates in UTC"
       (are [input expected] (= (to-ical input) (str expected "\r\n"))
-           [:dtstart (LocalDate. 2008 10 04)]
+           [:dtstart (org.joda.time.LocalDate. 2008 10 04)]
            "DTSTART:20081004"
+           [:dtstart (LocalDate/of 2008 10 04)]
+           "DTSTART:20081004"
+           [:dtstart (LocalDateTime/of 2008 12 24 05 20 30 0)]
+           "DTSTART:20081224T052030"
+           [:dtstart (ZonedDateTime/of 2008 12 24 05 20 30 0 (ZoneId/of "UTC"))]
+           "DTSTART:20081224T052030Z"
+           [:dtstart (OffsetDateTime/of 2008 12 24 05 20 30 0 (ZoneOffset/of "Z"))]
+           "DTSTART:20081224T052030Z"
            ;; It is worth using time/date-time for the sole reason
            ;; that, unlike the Java Joda Time, it always creates time
            ;; in UTC.

@@ -20,7 +20,8 @@
   clj-ical.format
   (:require [clojure.string :as string]
             [clj-time.format])
-  (:refer-clojure :exclude [println]))
+  (:refer-clojure :exclude [println])
+  (:import (java.time.format DateTimeFormatter)))
 
 (def ^{:doc "The media-type of all iCalendar objects, as declared in
      section 3.1"}
@@ -61,9 +62,23 @@
 
 (defmulti format-value class :default :other)
 
+(def BASIC_ISO_DATE_TIME
+  (-> (java.time.format.DateTimeFormatter/ofPattern "yyyyMMdd'T'HHmmss")))
+
+(def OFFSET_BASIC_ISO_DATE_TIME
+  (-> (java.time.format.DateTimeFormatter/ofPattern "yyyyMMdd'T'HHmmssX")))
+
 (defmethod format-value String [s] s)
 (defmethod format-value org.joda.time.LocalDate [ld]
            (.print (clj-time.format/formatters :basic-date) ld))
+(defmethod format-value java.time.LocalDate [ld]
+           (.format DateTimeFormatter/BASIC_ISO_DATE ld))
+(defmethod format-value java.time.LocalDateTime [ld]
+           (.format BASIC_ISO_DATE_TIME ld))
+(defmethod format-value java.time.ZonedDateTime [ld]
+           (.format OFFSET_BASIC_ISO_DATE_TIME ld))
+(defmethod format-value java.time.OffsetDateTime [ld]
+           (.format OFFSET_BASIC_ISO_DATE_TIME ld))
 (defmethod format-value org.joda.time.DateTime [dt]
            (.print (clj-time.format/formatters :basic-date-time-no-ms) dt))
 (defmethod format-value :other [s] s)
@@ -75,6 +90,12 @@
            (string/upper-case (str x)))
 
 (defmethod format-parameter-value org.joda.time.LocalDate [x]
+           (format-value x))
+
+(defmethod format-parameter-value java.time.LocalDate [x]
+           (format-value x))
+
+(defmethod format-parameter-value java.time.LocalDateTime [x]
            (format-value x))
 
 (defmethod format-parameter-value org.joda.time.DateTime [x]
