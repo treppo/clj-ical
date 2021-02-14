@@ -17,8 +17,7 @@
 (ns clj-ical.test-format
   (:use clojure.test)
   (:import
-   [org.joda.time LocalDate LocalDateTime DateTimeZone DateTimeConstants DateMidnight]
-   [org.joda.time.format ISODateTimeFormat])
+   [org.joda.time LocalDate])
   (:require clj-ical.format
             clj-time.format
             [clj-time.core :as time]))

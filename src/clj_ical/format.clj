@@ -15,12 +15,12 @@
 ;; Please see the LICENSE file for a copy of the GNU Affero General Public License.
 
 (ns
-    ^{:doc "A library for printing iCalendar objects as specified by [RFC 2445](http://rfc.ietf.org/rfc/2445.txt)."
-      :author "Malcolm Sparks"}
+  ^{:doc    "A library for printing iCalendar objects as specified by [RFC 2445](http://rfc.ietf.org/rfc/2445.txt)."
+    :author "Malcolm Sparks"}
   clj-ical.format
-  (:use clojure.string)
-  (:refer-clojure :exclude [replace reverse println])
-  (:require [clj-time.format :as format]))
+  (:require [clojure.string :as string]
+            [clj-time.format])
+  (:refer-clojure :exclude [println]))
 
 (def ^{:doc "The media-type of all iCalendar objects, as declared in
      section 3.1"}
@@ -72,7 +72,7 @@
 (defmulti format-parameter-value class :default :other)
 
 (defmethod format-parameter-value Boolean [x]
-           (upper-case (str x)))
+           (string/upper-case (str x)))
 
 (defmethod format-parameter-value org.joda.time.LocalDate [x]
            (format-value x))
@@ -84,7 +84,7 @@
            (cond
             (is-quoted? x) x
             :otherwise ((comp quote-if-necessary
-                              upper-case
+                              string/upper-case
                               forbid-quote-in-parameter-value) x)))
 
 (defmulti serialize-param coll?)
@@ -104,10 +104,10 @@
   (letfn [(serialize-params [params]
                             (map (fn [[k v]]
                                    (format "%s=%s"
-                                           (upper-case (name k))
+                                           (string/upper-case (name k))
                                            (serialize-param v))) params))]
     (assert (keyword? (first obj)))
-    (let [n (upper-case (name (first obj)))
+    (let [n (string/upper-case (name (first obj)))
           snd (second obj)
           params (if (map? snd) snd)
           values (drop (if params 2 1) obj)
